@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../login/route";
 import { openDb } from "@/app/lib/db";
-import { v4 as uuidv4 } from "uuid";
+import { idRand } from "@/app/utils/idRand";
 
 interface Comment {
   comment_id: string;
@@ -32,16 +32,18 @@ export async function POST(request: NextRequest) {
 
     const db = await openDb();
 
-    const comment_id = uuidv4();
+    const randomCommentId = idRand(4);
+
+    const comment_id = `${post_id}%${randomCommentId}`;
 
     // Create new comment
-    const result = await db.run(
+    await db.run(
       "INSERT INTO comments (comment_id, post_id, commenter_name, comment_body) VALUES (?, ?, ?, ?)",
       [comment_id, post_id, commenter_name, comment_body]
     );
 
     const newComment: Comment = {
-      comment_id: result.lastID,
+      comment_id: comment_id,
       post_id,
       commenter_name,
       comment_body,
