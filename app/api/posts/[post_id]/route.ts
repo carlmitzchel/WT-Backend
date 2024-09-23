@@ -16,6 +16,52 @@ interface Post {
   comments: Comment[];
 }
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { post_id: string } }
+) {
+  const apiKey = request.headers.get("X-API-Token");
+  if (!apiKey || !validateApiKey(apiKey)) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const post_id = parseInt(params.post_id);
+
+    const db = await openDb();
+
+    const post = (await db.get(
+      "SELECT * FROM posts WHERE post_id = ?",
+      post_id
+    )) as Post | undefined;
+
+    if (!post) {
+      return NextResponse.json({ success: false });
+    }
+
+    // Delete the post
+    await db.run("DELETE FROM posts WHERE post_id = ?", post_id);
+
+    // Delete comments for the post
+    await db.run("DELETE FROM comments WHERE post_id = ?", post_id);
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+        error: (error as Error).message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { post_id: string } }
