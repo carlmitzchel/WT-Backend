@@ -1,7 +1,6 @@
 import { openDb } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../../login/route";
-import { comment } from "postcss";
 
 interface Comment {
   comment_id: string;

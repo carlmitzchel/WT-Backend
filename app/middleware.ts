@@ -13,6 +13,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  if (!apiKey && !request.nextUrl.pathname.startsWith("/")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (apiKey && request.nextUrl.pathname.startsWith("/")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   return NextResponse.next();
 }
 

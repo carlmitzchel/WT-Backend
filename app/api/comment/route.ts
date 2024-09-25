@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const randomCommentId = idRand(4);
 
-    const comment_id = `${post_id}%${randomCommentId}`;
+    const comment_id = `${post_id}%${commenter_name}`;
 
     // Create new comment
     await db.run(

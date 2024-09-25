@@ -15,8 +15,7 @@ export async function POST(request: Request) {
   }
 
   const apiKey = crypto.randomBytes(32).toString("hex");
-
-  const expiresAt = Date.now() + 5 * 60 * 1000;
+  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
 
   apiKeys.set(apiKey, { expiresAt });
 
