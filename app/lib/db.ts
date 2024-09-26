@@ -1,15 +1,24 @@
 import sqlite3 from "sqlite3";
-import { open } from "sqlite";
-
-let db: any = null;
+import { open, Database } from "sqlite";
+import path from "path";
+let db: Database<sqlite3.Database> | null = null;
 
 async function openDb() {
   if (!db) {
-    db = await open({
-      filename: "/blog.sqlite",
-      driver: sqlite3.Database,
-    });
-    await initializeDb();
+    const dbPath = path.resolve(process.cwd(), "blog.sqlite");
+    console.log(`Attempting to open database at: ${dbPath}`);
+
+    try {
+      db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database,
+      });
+      console.log("Database connection established");
+      await initializeDb();
+    } catch (error) {
+      console.error("Error opening database:", error);
+      throw error;
+    }
   }
   return db;
 }
