@@ -1,71 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Adjust the import path as necessary
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { useQuery } from "@tanstack/react-query";
+import { getPosts, Post } from "@/services/api";
+import { PacmanLoader } from "react-spinners";
 
-interface Post {
-  post_id: number;
-  title: string;
-  content: string;
-}
+export default function Posts() {
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useQuery<Post[]>({
+    queryKey: ["posts"],
+    queryFn: getPosts,
+  });
 
-interface Comment {
-  comment_id: string;
-  commenter_name: string;
-  comment_body: string;
-}
-
-const PostsList = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [comments, setComments] = useState<Record<number, Comment[]>>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get("/api/posts");
-        setPosts(response.data.posts);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch posts");
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
-  if (loading) {
+  if (isLoading)
     return (
-      <div>
-        <Skeleton className="w-full h-24" />
-        <Skeleton className="w-full h-24 mt-2" />
-        <Skeleton className="w-full h-24 mt-2" />
+      <div className="flex flex-row min-h-screen justify-center items-center">
+        <PacmanLoader />
       </div>
     );
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  if (error) return <div>An error occurred: {error.message}</div>;
 
   return (
-    <div className="space-y-4">
-      {posts.map((post) => (
-        <Card key={post.post_id} className="shadow-md">
-          <CardHeader>
-            <CardTitle>{post.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{post.content}</p>
-          </CardContent>
-        </Card>
+    <div className="grid grid-cols-4 gap-4">
+      {posts?.map((post) => (
+        <div key={post.post_id} className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
+          <p className="mb-4">{post.content}</p>
+          {/* TODO: COMMENTS INTEGRATIONS */}
+          <div className="bg-slate-100 rounded-lg p-3">
+            <h3 className="text-xl font-semibold mb-2 ">Comments:</h3>
+
+            {post.comments.map((comment) => (
+              <ul className="list-none gap-3" key={comment.comment_id}>
+                <div className="py-2" key={comment.comment_id}>
+                  <li className="bg-slate-200 rounded-lg">
+                    <div className="flex flex-col p-3">
+                      <h3 className="text-lg font-bold">
+                        {comment.commenter_name}
+                      </h3>
+                      <p className="text-md">{comment.comment_body}</p>
+                    </div>
+                  </li>
+                </div>
+              </ul>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
-};
-
-export default PostsList;
+}
