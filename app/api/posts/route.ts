@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../login/route";
 import { openDb } from "@/app/lib/db";
+import { headers } from "next/headers";
 
 interface Comment {
   comment_id: string;
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
       comments: [],
     };
 
+    console.log(request.headers);
     return NextResponse.json({ success: true, post: newPost }, { status: 201 });
   } catch (error) {
     console.error("Error creating post:", error);
@@ -71,6 +73,8 @@ export async function GET() {
   try {
     const db = await openDb();
     const posts = await db.all("SELECT * FROM posts");
+
+    console.log("Fetching posts...");
 
     // Fetch comments for each post
     for (const post of posts) {

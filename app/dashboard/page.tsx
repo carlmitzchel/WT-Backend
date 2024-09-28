@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   // }
 
   return (
-    <main className="container mx-auto px-4">
+    <main className="container mx-auto px-4 pt-8">
       <Posts />
     </main>
   );
