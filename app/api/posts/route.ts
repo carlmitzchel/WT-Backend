@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateApiKey } from "../login/route";
 import { openDb } from "@/app/lib/db";
-import { headers } from "next/headers";
-
+import { authenticateRequest } from "@/app/utils/auth";
 interface Comment {
   comment_id: string;
   commenter_name: string;
@@ -18,9 +16,7 @@ interface Post {
 }
 
 export async function POST(request: NextRequest) {
-  // Check for API key
-  const apiKey = request.headers.get("X-API-Token");
-  if (!apiKey || !validateApiKey(apiKey)) {
+  if (!(await authenticateRequest(request))) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }
@@ -55,7 +51,7 @@ export async function POST(request: NextRequest) {
     };
 
     console.log(request.headers);
-    return NextResponse.json({ success: true, post: newPost }, { status: 201 });
+    return NextResponse.json({ post: newPost }, { status: 201 });
   } catch (error) {
     console.error("Error creating post:", error);
     return NextResponse.json(
@@ -69,7 +65,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Authenticate request
+  if (!(await authenticateRequest(request))) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const db = await openDb();
     const posts = await db.all("SELECT * FROM posts");

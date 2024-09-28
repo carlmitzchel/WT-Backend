@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateApiKey } from "../login/route";
 import { openDb } from "@/app/lib/db";
-import { idRand } from "@/app/utils/idRand";
+import { authenticateRequest } from "@/app/utils/auth";
 
 interface Comment {
   comment_id: string;
@@ -10,9 +9,7 @@ interface Comment {
 }
 
 export async function POST(request: NextRequest) {
-  // Check for API key
-  const apiKey = request.headers.get("X-API-Token");
-  if (!apiKey || !validateApiKey(apiKey)) {
+  if (!(await authenticateRequest(request))) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }

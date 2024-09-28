@@ -1,6 +1,6 @@
 import { openDb } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { validateApiKey } from "../../login/route";
+import { authenticateRequest } from "@/app/utils/auth";
 
 interface Comment {
   comment_id: string;
@@ -20,8 +20,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { comment_id: string }
 ) {
-  const apiKey = request.headers.get("X-API-Token");
-  if (!apiKey || !validateApiKey(apiKey)) {
+  if (!(await authenticateRequest(request))) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }
@@ -63,8 +62,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { comment_id: string } }
 ) {
-  const apiKey = request.headers.get("X-API-Token");
-  if (!apiKey || !validateApiKey(apiKey)) {
+  if (!(await authenticateRequest(request))) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }

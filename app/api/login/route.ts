@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
   if (username !== "tomasinoweb" || password !== "tmsnw3btech") {
     return NextResponse.json(
-      { success: false, message: "Invalid credentials" },
+      { success: false, message: null },
       { status: 401 }
     );
   }

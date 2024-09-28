@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { NextRequest } from "next/server";
 
 const secretKey = new TextEncoder().encode(
   process.env.JWT_SECRET_KEY || "tomasinoweb"
@@ -15,6 +16,27 @@ export async function signToken(
     .setExpirationTime(expiresIn)
     .sign(secretKey);
   return token;
+}
+
+export async function authenticateRequest(
+  request: NextRequest
+): Promise<boolean> {
+  // Check for API key
+  const apiKey = request.headers.get("X-API-Token");
+  if (apiKey && validateApiKey(apiKey)) {
+    return true;
+  }
+
+  // Check for session token
+  const accessToken = cookies().get("accessToken")?.value;
+  if (accessToken) {
+    const payload = await verifyToken(accessToken);
+    if (payload) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function verifyToken(token: string) {
