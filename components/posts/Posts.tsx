@@ -25,7 +25,10 @@ export default function Posts() {
   return (
     <div className="grid grid-cols-4 gap-4">
       {posts?.map((post) => (
-        <div key={post.post_id} className="bg-white p-6 rounded-lg shadow-md">
+        <div
+          key={post.post_id}
+          className="bg-slate-50 p-6 rounded-lg shadow-md"
+        >
           <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
           <p className="mb-4">{post.content}</p>
           {/* TODO: COMMENTS INTEGRATIONS */}
